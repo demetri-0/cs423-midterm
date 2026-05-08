@@ -40,7 +40,23 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
+    Bias occurs when a model poorly captures trends in the data, resulting in underfitting that reduces its predictive power. Variance occurs when a model fits the training set of data too well, and becomes very sensitive to deviations from the training set. A model with heavy bias typically has high training and test error, while a model with heavy variance typically has low training error and high test error. Bias and variance are inversely related - as one goes up, the other comes down. The goal of a strong model is to minimize both.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
     2. If both train and test set RMSE are high what can we say about bias vs. variance?
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    If the training and test sets have high RMSE, we can infer that the model has high bias. The poor performance in the training set confirms that the model is not properly capturing trends in the data, which is a clear sign of underfitting and the presence of bias. High bias is the main problem for this model.
     """)
     return
 
@@ -56,7 +72,23 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
+    The curse of dimensionality refers to the problems that arise in a model when the examined data has a large number of dimensions/features. These problems include overfitting and heavy computational load. When there are many dimensions, data becomes sparse, and it becomes difficult to capture meaningful trends. These problems can be tackled through dimension reduction and feature selection. Through examining the correlation among features and the target, the least meaningful features can be dropped. A technique like PCA can combine features to reduce dimensionality while also keeping any existing trends in the data.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
     4. If you want to compare the distributions of five variables what visualization would you use and why?
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    Box plots would be my choice to visualize the distribution of five variables. Box plots let viewers immediatly see the minimum, Q1, median, Q2, and maximum of a feature, and are relatively easy to interpret. Five box plots side-by-side would be my preferred way of examining five variables and their distribution.
     """)
     return
 
