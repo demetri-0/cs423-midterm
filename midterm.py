@@ -26,7 +26,7 @@ def _():
     from sklearn import preprocessing
     from sklearn.decomposition import PCA 
 
-    return mlba, mo, px
+    return PCA, mlba, mo, pd, px
 
 
 @app.cell(hide_code=True)
@@ -222,6 +222,54 @@ def _(numeric_only_df):
 @app.cell
 def _(clean_numeric_df):
     clean_numeric_df.sample(5)
+    return
+
+
+@app.cell
+def _(PCA, clean_numeric_df, pd):
+    raw_pca_model = PCA()
+    raw_pca_model.fit(clean_numeric_df)
+    raw_pca_component_labels = [
+        f"PC{i}" for i in range(1, len(raw_pca_model.explained_variance_ratio_) + 1)
+    ]
+
+    raw_pca_summary = pd.DataFrame(
+        {
+            "Component": raw_pca_component_labels,
+            "Explained Variance Ratio": raw_pca_model.explained_variance_ratio_,
+            "Cumulative Explained Variance": raw_pca_model.explained_variance_ratio_.cumsum(),
+        }
+    )
+    raw_pca_summary
+    return raw_pca_component_labels, raw_pca_model
+
+
+@app.cell
+def _(clean_numeric_df, pd, raw_pca_component_labels, raw_pca_model):
+    raw_pca_loadings = pd.DataFrame(
+        raw_pca_model.components_.T,
+        index=clean_numeric_df.columns,
+        columns=raw_pca_component_labels,
+    )
+    raw_pca_loadings
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    Based on the PCA analysis of the cleaned data above, it appears that only the first two principal components would be needed to appropriately reduce dimensionality given they explain >90% of the variance in the data. Upon further examining the feature weights in these components, it appears that PC1 encompasses tuition information, and PC2 encompasses a mixture of student quantities and tuition. It is important, however, to keep in mind that this initial analysis is based on data that is not normalized.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Should the data be normalized?
+
+    Yes, this data should be normalized. After cleaning, the range of the remaining features varies heavily, containing units such as dollars, student counts, and percentages. Normalization would bring all these values into the same scale, and would make any following analysis more meaningful.
+    """)
     return
 
 
