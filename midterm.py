@@ -26,7 +26,7 @@ def _():
     from sklearn import preprocessing
     from sklearn.decomposition import PCA 
 
-    return mlba, mo
+    return mlba, mo, px
 
 
 @app.cell(hide_code=True)
@@ -125,6 +125,82 @@ def _(df):
 @app.cell
 def _(df):
     df.shape
+    return
+
+
+@app.cell
+def _(df, px):
+    heatmap_numeric_df = df.select_dtypes(include="number")
+    heatmap_corr = heatmap_numeric_df.corr(numeric_only=True)
+
+    fig1 = px.imshow(
+        heatmap_corr,
+        text_auto=True,
+        color_continuous_scale="RdBu_r",
+        zmin=-1,
+        zmax=1,
+        title="Correlation Heatmap of Numeric Variables",
+    )
+    fig1.update_layout(width=900, height=800)
+    fig1
+    return
+
+
+@app.cell
+def _(df):
+    import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
+
+    scatter_target = "Graduation rate"
+    scatter_numeric_df = df.select_dtypes(include="number")
+    scatter_corr_to_target = (
+        scatter_numeric_df.corr(numeric_only=True)[scatter_target]
+        .drop(labels=[scatter_target])
+        .abs()
+        .sort_values(ascending=False)
+    )
+    scatter_top_features = scatter_corr_to_target.head(3).index.tolist()
+
+    fig2 = make_subplots(
+        rows=1,
+        cols=3,
+        subplot_titles=scatter_top_features,
+    )
+
+    for i, feature in enumerate(scatter_top_features, start=1):
+        fig2.add_trace(
+            go.Scatter(
+                x=df[feature],
+                y=df[scatter_target],
+                mode="markers",
+                marker=dict(size=6, opacity=0.6),
+                name=feature,
+                showlegend=False,
+            ),
+            row=1,
+            col=i,
+        )
+        fig2.update_xaxes(title_text=feature, row=1, col=i)
+        fig2.update_yaxes(title_text=scatter_target, row=1, col=i)
+
+    fig2.update_layout(
+        title="Top 3 Features Most Correlated with Graduation Rate",
+        width=1100,
+        height=400,
+    )
+    fig2
+    return
+
+
+@app.cell
+def _(df, px):
+    fig3 = px.box(
+        df,
+        y="Graduation rate",
+        title="Box Plot of Graduation Rate",
+    )
+    fig3.update_layout(width=700, height=500)
+    fig3
     return
 
 
