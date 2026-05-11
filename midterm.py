@@ -146,6 +146,14 @@ def _(df, px):
     return
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    This correlation heatmap allows for easy observation of correlation between variables. Most importantly, it allows us to indentify areas of strong positive and negative correlation. For instance, in-state and out-of-state tuition have a high correlation of ~0.93.
+    """)
+    return
+
+
 @app.cell
 def _(df):
     import plotly.graph_objects as go
@@ -192,6 +200,14 @@ def _(df):
     return
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    An algorithm was used to identify the three features with the strongest correlation to the target "Graduation rate." These features were then plotted against the target in a scatterplot to provide a better visualization of their relationship, which is positive for all three features. This is especially helpful in seeing the connection between tuition and graduation rate.
+    """)
+    return
+
+
 @app.cell
 def _(df, px):
     fig3 = px.box(
@@ -204,10 +220,20 @@ def _(df, px):
     return
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    A simple box plot is used to display the "Graduation rate," showing key pieces of statistical information that allow for a better understanding of the target.
+    """)
+    return
+
+
 @app.cell
 def _(df):
     numeric_only_df = df.select_dtypes(include="number")
-    numeric_only_df = numeric_only_df.drop(columns=["Public (1)/ Private (2)"])
+    numeric_only_df = numeric_only_df.drop(
+        columns=["Public (1)/ Private (2)", "Graduation rate"]
+    )
     numeric_only_df.shape
     return (numeric_only_df,)
 
@@ -269,6 +295,79 @@ def _(mo):
     ## Should the data be normalized?
 
     Yes, this data should be normalized. After cleaning, the range of the remaining features varies heavily, containing units such as dollars, student counts, and percentages. Normalization would bring all these values into the same scale, and would make any following analysis more meaningful.
+    """)
+    return
+
+
+@app.cell
+def _(clean_numeric_df, pd):
+    from sklearn.preprocessing import StandardScaler
+
+    scaler = StandardScaler()
+    scaled_array = scaler.fit_transform(clean_numeric_df)
+    standardized_numeric_df = pd.DataFrame(
+        scaled_array,
+        columns=clean_numeric_df.columns,
+        index=clean_numeric_df.index,
+    )
+    return (standardized_numeric_df,)
+
+
+@app.cell
+def _(standardized_numeric_df):
+    standardized_numeric_df.sample(5)
+    return
+
+
+@app.cell
+def _(PCA, pd, standardized_numeric_df):
+    scaled_pca_model = PCA()
+    scaled_pca_model.fit(standardized_numeric_df)
+    scaled_pca_component_labels = [
+        f"PC{i}" for i in range(1, len(scaled_pca_model.explained_variance_ratio_) + 1)
+    ]
+
+    scaled_pca_summary = pd.DataFrame(
+        {
+            "Component": scaled_pca_component_labels,
+            "Explained Variance Ratio": scaled_pca_model.explained_variance_ratio_,
+            "Cumulative Explained Variance": scaled_pca_model.explained_variance_ratio_.cumsum(),
+        }
+    )
+    scaled_pca_summary
+    return scaled_pca_component_labels, scaled_pca_model
+
+
+@app.cell
+def _(
+    pd,
+    scaled_pca_component_labels,
+    scaled_pca_model,
+    standardized_numeric_df,
+):
+    scaled_pca_loadings = pd.DataFrame(
+        scaled_pca_model.components_.T,
+        index=standardized_numeric_df.columns,
+        columns=scaled_pca_component_labels,
+    )
+    scaled_pca_loadings
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    Upon examining the PCA analysis of the normalized data above, nine principal components should be kept to explain >90% of the variance in the data. Below is a rough interpretation of each using the weights of the related features:
+
+    PC1: new students from top 10%-25% and tuition
+    PC2: student quantities
+    PC3: book costs and personal costs
+    PC4: room, board, and additional fees
+    PC5: additional fees and book costs
+    PC6: additional fees and personal costs
+    PC7: part time students and PHD faculty members
+    PC8: student/faculty ratio and personal costs
+    PC9: board
     """)
     return
 
