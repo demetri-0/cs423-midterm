@@ -204,5 +204,26 @@ def _(df, px):
     return
 
 
+@app.cell
+def _(df):
+    numeric_only_df = df.select_dtypes(include="number")
+    numeric_only_df = numeric_only_df.drop(columns=["Public (1)/ Private (2)"])
+    numeric_only_df.shape
+    return (numeric_only_df,)
+
+
+@app.cell
+def _(numeric_only_df):
+    clean_numeric_df = numeric_only_df.dropna()
+    clean_numeric_df.shape
+    return (clean_numeric_df,)
+
+
+@app.cell
+def _(clean_numeric_df):
+    clean_numeric_df.sample(5)
+    return
+
+
 if __name__ == "__main__":
     app.run()
